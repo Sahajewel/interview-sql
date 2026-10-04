@@ -219,3 +219,56 @@ HAVING COUNT(check_ins1.id) <2
 ORDER BY elders1.id
 ;
 
+
+CREATE TABLE families(
+    id SERIAL PRIMARY KEY,
+    family_name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO families (family_name) VALUES
+('choudhury'),
+('khan'),
+('Mia'),
+('bacchan'),
+('debnath');
+
+SELECT * FROM families;
+
+CREATE TABLE elders4 (
+    id SERIAL PRIMARY KEY,
+    family_id INT,
+    FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE CASCADE,
+name VARCHAR (100) NOT NULL
+);
+
+
+INSERT INTO elders4 (family_id, name) VALUES
+(2,'Selim'),
+(5,'Rajib'),
+(2,'Rahim'),
+(3,'Sumon');
+
+SELECT * FROM elders4;
+
+CREATE TABLE check_ins4 (
+    id SERIAL PRIMARY KEY,
+    elder_id INT,
+    FOREIGN KEY(elder_id) REFERENCES elders4(id) ON DELETE CASCADE,
+    checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO check_ins4(elder_id, checked_at) VALUES 
+(1,'2026-10-04 10:30:00'),
+(2,'2026-10-03 12:30:00');
+
+SELECT * FROM check_ins4;
+
+SELECT families.id, families.family_name, COUNT(check_ins4.id) AS check_ins_count
+ FROM families
+LEFT JOIN elders4
+ ON families.id = elders4.family_id
+ LEFT JOIN check_ins4
+ ON elders4.id = check_ins4.elder_id
+ AND check_ins4.checked_at >= NOW() - INTERVAL '7 days'
+GROUP BY families.id, families.family_name
+ORDER BY families.id;
