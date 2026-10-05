@@ -272,3 +272,62 @@ LEFT JOIN elders4
  AND check_ins4.checked_at >= NOW() - INTERVAL '7 days'
 GROUP BY families.id, families.family_name
 ORDER BY families.id;
+
+CREATE TABLE users6(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO users6(name) VALUES
+('Saha'),
+('Jewel'),
+('Kumar'),
+('Mitu'),
+('Pavel');
+
+CREATE TABLE check_ins6(
+    id SERIAL PRIMARY KEY,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users6(id) ON DELETE CASCADE,
+    checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO check_ins6(user_id, checked_at) VALUES 
+(1,'2026-10-03 10:00:00'),
+(3,'2026-10-02 11:00:00'),
+(5,'2026-10-01 12:00:00'),
+(1,'2026-10-02 01:00:00'),
+(5,'2026-10-01 12:00:00'),
+(3,'2026-10-04 02:00:00'),
+(5,'2026-10-01 12:00:00'),
+(2,'2026-10-01 12:00:00');
+
+SELECT  * FROM check_ins6;
+
+CREATE TABLE emergencies6(
+    id SERIAL PRIMARY KEY,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users6(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO emergencies6(user_id, created_at) VALUES 
+(1, '2026-10-04 09:12:00'),
+(2, '2026-10-03 08:12:30'),
+(1, '2026-10-02 09:11:00'),
+(3, '2026-10-01 09:12:00'),
+(1, '2026-10-04 10:12:00'),
+(1, '2026-10-03 08:12:00'),
+(4, '2026-10-02 07:12:00');
+
+SELECT * FROM emergencies6;
+
+SELECT users6.id, users6.name, 
+COUNT(check_ins6.checked_at) AS check_ins_count, 
+COUNT(emergencies6.created_at) AS cmergencies6_count 
+ FROM users6
+LEFT JOIN check_ins6 ON users6.id = check_ins6.user_id
+LEFT JOIN emergencies6 ON users6.id = emergencies6.user_id
+GROUP BY users6.id, users6.name
+ORDER BY users6.id 
+;
