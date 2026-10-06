@@ -323,11 +323,114 @@ INSERT INTO emergencies6(user_id, created_at) VALUES
 SELECT * FROM emergencies6;
 
 SELECT users6.id, users6.name, 
-COUNT(check_ins6.checked_at) AS check_ins_count, 
-COUNT(emergencies6.created_at) AS cmergencies6_count 
+COUNT( check_ins6.id) AS check_ins_count, 
+COUNT( emergencies6.id) AS cmergencies6_count 
  FROM users6
 LEFT JOIN check_ins6 ON users6.id = check_ins6.user_id
 LEFT JOIN emergencies6 ON users6.id = emergencies6.user_id
 GROUP BY users6.id, users6.name
 ORDER BY users6.id 
 ;
+CREATE TABLE properties1 (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(100) NOT NULL
+);
+INSERT INTO properties1(title) VALUES
+('Flat A'),
+('Flat B'),
+('Flat C'),
+('Flat D'),
+('Flat E'),
+('Flat F');
+
+SELECT * FROM properties1;
+CREATE TABLE applications1 (
+    id SERIAL PRIMARY KEY,
+    property_id INT,
+    FOREIGN KEY (property_id) REFERENCES properties1(id) ON DELETE CASCADE,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO applications1 (property_id, applied_at) VALUES 
+(1,'2026-10-06 10:00:00'),
+(2,'2026-10-02 10:00:00'),
+(1,'2026-10-01 10:00:00'),
+(4,'2026-09-15 10:00:00'),
+(1,'2026-09-20 10:00:00'),
+(1,'2026-09-25 10:00:00'),
+(5,'2026-09-27 10:00:00'),
+(1,'2026-09-28 10:00:00');
+
+SELECT * FROM applications1;
+
+SELECT p.id, p.title, COUNT(a.id) AS total_count
+ FROM properties1 p
+ LEFT JOIN applications1 a ON p.id = a.property_id AND a.applied_at >= NOW() - INTERVAL '30 days'
+ GROUP BY p.id, p.title
+ HAVING  COUNT(a.id) >2
+
+ ;
+
+ ALTER TABLE applications1
+ ADD COLUMN status VARCHAR(20) DEFAULT 'PENDING';
+
+SELECT * FROM applications1;
+ALTER TABLE applications1
+ADD COLUMN email VARCHAR(20) NOT NULL DEFAULT 'saha@gmail.com';
+UPDATE applications1
+SET email='maa@gmail.com'
+WHERE id=1;
+SELECT * FROM properties1;
+ALTER TABLE applications1
+RENAME COLUMN  email TO user_email;
+
+
+ALTER TABLE applications1
+ALTER COLUMN user_email TYPE VARCHAR(50);
+
+SELECT id, name FROM users6;
+ALTER TABLE users6
+ADD COLUMN age INT;
+UPDATE users6
+SET age=90
+Where id=5;
+SELECT id, age FROM users6
+ORDER BY id DESC;
+
+SELECT id, name,age FROM users6
+WHERE age>=70;
+
+
+SELECT id,age FROM users6
+ORDER BY age DESC
+;
+
+SELECT * FROM check_ins6;
+SELECT users6.id, users6.name, COUNT(check_ins6.id) AS check_count
+FROM users6
+LEFT JOIN check_ins6 ON  users6.id = check_ins6.user_id
+;
+
+SELECT users6.name, check_ins6.checked_at FROM users6
+JOIN check_ins6 ON users6.id = check_ins6.user_id
+GROUP BY users6.name, check_ins6.checked_at;
+
+SELECT  users6.name,COUNT(check_ins6.id) AS total_count
+FROM users6
+LEFT JOIN check_ins6 ON users6.id = check_ins6.user_id
+GROUP BY users6.id,users6.name
+ORDER BY total_count DESC;
+
+SELECT  users6.name,COUNT(check_ins6.id) AS total_count
+FROM users6
+LEFT JOIN check_ins6 ON users6.id = check_ins6.user_id
+GROUP BY users6.id,users6.name
+HAVING COUNT(check_ins6.id) >=2;
+
+SELECT users6.name, check_ins6.checked_at FROM users6
+JOIN check_ins6 ON users6.id = check_ins6.user_id;
+SELECT * FROM users6 WHERE age>=70;
+SELECT * FROM users66;
+
+
+ 
