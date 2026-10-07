@@ -432,5 +432,37 @@ JOIN check_ins6 ON users6.id = check_ins6.user_id;
 SELECT * FROM users6 WHERE age>=70;
 SELECT * FROM users66;
 
+CREATE TABLE elders10(
+    id SERIAL PRIMARY KEY,
+    name  VARCHAR(100) NOT NULL
+);
 
- 
+ INSERT INTO elders10(name) VALUES
+ ('Motin'),
+ ('Shafiq'),
+ ('Rafiq'),
+ ('Zabbar'),
+ ('Roton');
+
+ CREATE TABLE check_ins10(
+    id SERIAL PRIMARY KEY,
+    elder_id INT,
+    FOREIGN KEY(elder_id) REFERENCES elders10 ON DELETE CASCADE
+ );
+ ALTER TABLE check_ins10
+  ADD COLUMN checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ INSERT INTO check_ins10(elder_id, checked_at ) VALUES
+ (1,'2026-10-7'),
+ (3,'2026-10-5'),
+ (1,'2026-10-4'),
+ (5,'2026-10-3');
+
+ SELECT e.id, e.name, COUNT(c.id) AS total_check_ins 
+ FROM elders10 e
+ LEFT JOIN check_ins10 c ON e.id=c.elder_id AND c.checked_at >= NOW() - INTERVAL '7 days'
+ GROUP BY e.id, e.name
+ HAVING COUNT(c.id) >= 1
+ ORDER BY total_check_ins DESC
+ LIMIT 2
+ ;
