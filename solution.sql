@@ -1,3 +1,4 @@
+-- Active: 1791297577197@@127.0.0.1@5432@interview
 CREATE DATABASE problem_solving;
 CREATE TABLE elders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
