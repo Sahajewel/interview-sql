@@ -450,6 +450,7 @@ CREATE TABLE elders10(
     elder_id INT,
     FOREIGN KEY(elder_id) REFERENCES elders10 ON DELETE CASCADE
  );
+ SELECT * FROM check_ins10;
  ALTER TABLE check_ins10
   ADD COLUMN checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
@@ -467,3 +468,79 @@ CREATE TABLE elders10(
  ORDER BY total_check_ins DESC
  LIMIT 2
  ;
+
+ EXPLAIN ANALYZE
+ SELECT * FROM check_ins10 
+ WHERE elder_id = 2
+ AND checked_at >= NOW() - INTERVAL '7 days';
+
+CREATE INDEX create_index
+ON check_ins10(elder_id);
+
+
+
+CREATE TABLE products(
+    id SERIAL PRIMARY KEY,
+    product_id INT,
+    product_name VARCHAR(50) NOT NULL,
+    price INT 
+);
+
+ALTER TABLE products
+ALTER COLUMN price SET NOT NULL
+
+ALTER TABLE products
+ADD CONSTRAINT check_price_non_negative CHECK (price>=0)
+
+ALTER TABLE products
+DROP COLUMN product_id;
+
+CREATE TABLE orders(
+    id SERIAL PRIMARY KEY,
+   product_id INT,
+   FOREIGN KEY(product_id) REFERENCES products ON DELETE CASCADE,
+   quantity INT NOT NULL
+);
+ALTER TABLE orders
+ADD CONSTRAINT fk_products
+FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE;
+
+SELECT * FROM orders;
+
+ALTER TABLE orders
+ALTER COLUMN quantity SET NOT NULL
+;
+
+テーブル構成
+1. products（商品テーブル）
+id (INT, PK)：商品ID
+product_name (VARCHAR)：商品名
+price (INT)：単価
+2. orders（注文テーブル）
+id (INT, PK)：注文ID
+product_id (INT, FK)：商品ID
+quantity (INT)：数量
+■ 問題
+商品ID（p_product_id）を受け取り、その商品の売上合計（単価 × 数量の合計）を求めるSQLを作成してください。
+※ 注文履歴が存在しない場合は、0 を返してください。
+制限時間：5分
+
+
+INSERT INTO products(product_name,price) VALUES
+('orange',300),
+('apple',200),
+('mango',100),
+('water melon',400),
+('melon',500)
+;
+
+INSERT INTO orders (product_id, quantity) VALUES
+(3,5),
+(5,3)
+;
+SELECT products.id, COALESCE(SUM(products.price * orders.quantity),0) AS total_sales
+ from products
+ LEFT JOIN orders ON products.id= orders.product_id
+ GROUP BY products.id;
+
+ SELECT * FROM products;
