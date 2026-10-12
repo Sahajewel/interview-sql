@@ -490,7 +490,7 @@ ALTER TABLE products
 ALTER COLUMN price SET NOT NULL
 
 ALTER TABLE products
-ADD CONSTRAINT check_price_non_negative CHECK (price>=0)
+ADD CONSTRAINT check_price_non_negative_1 CHECK (price>0)
 
 ALTER TABLE products
 DROP COLUMN product_id;
@@ -544,3 +544,19 @@ SELECT products.id, COALESCE(SUM(products.price * orders.quantity),0) AS total_s
  GROUP BY products.id;
 
  SELECT * FROM products;
+
+ SELECT products.id, SUM(orders.product_id) AS total_sales 
+ FROM products
+ GROUP BY products.id;
+
+ SELECT orders.product_id, SUM(orders.product_id) AS total_product
+ FROM orders
+ GROUP BY orders.product_id
+ HAVING orders.product_id>10;
+
+
+ CREATE TABLE products1(
+    id SERIAL PRIMARY KEY,
+    product_name VARCHAR(20) NOT NULL,
+    stock_quantity INT NOT NULL DEFAULT 0 CHECK(stock_quantity>=0)
+ )
