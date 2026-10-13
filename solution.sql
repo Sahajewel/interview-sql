@@ -559,4 +559,31 @@ SELECT products.id, COALESCE(SUM(products.price * orders.quantity),0) AS total_s
     id SERIAL PRIMARY KEY,
     product_name VARCHAR(20) NOT NULL,
     stock_quantity INT NOT NULL DEFAULT 0 CHECK(stock_quantity>=0)
+ );
+ 
+ INSERT INTO products1 (product_name, stock_quantity) VALUES
+ ('Laptop', 50),
+ ('Mouse', 70),
+ ('Keyboard', 30),
+ ('Monitor', 40)
+ ;
+ CREATE TABLE orders1 (
+    id SERIAL PRIMARY key,
+    product_id INT NOT NULL REFERENCES products1(id) ON DELETE CASCADE,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
  )
+ ;
+
+ INSERT INTO orders1 (product_id, quantity) VALUES
+ (1,3),
+ (1,10),
+ (3,4)
+ ;
+SELECT products1.id, products1.product_name, products1.stock_quantity ,COALESCE( SUM(orders1.quantity),0) AS total_ordered
+ FROM products1
+LEFT JOIN orders1 ON products1.id = orders1.product_id
+GROUP BY products1.id,  products1.product_name
+ORDER BY products1.id DESC
+;
+ 
