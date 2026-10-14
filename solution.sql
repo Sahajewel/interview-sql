@@ -578,12 +578,59 @@ SELECT products.id, COALESCE(SUM(products.price * orders.quantity),0) AS total_s
  INSERT INTO orders1 (product_id, quantity) VALUES
  (1,3),
  (1,10),
+ (1,10),
  (3,4)
  ;
 SELECT products1.id, products1.product_name, products1.stock_quantity ,COALESCE( SUM(orders1.quantity),0) AS total_ordered
  FROM products1
 LEFT JOIN orders1 ON products1.id = orders1.product_id
 GROUP BY products1.id,  products1.product_name
-ORDER BY products1.id DESC
+
 ;
- 
+
+SELECT product_id, SUM(quantity) AS total_quantity,
+CASE 
+WHEN SUM(quantity) >=20 THEN 'High Demand'
+WHEN SUM(quantity) >=10 THEN 'Medium Demand'
+ELSE 'Low Demand'
+END AS status
+from orders1
+GROUP BY product_id
+HAVING SUM(quantity) >=20 
+;
+
+CREATE TABLE customrrs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    membership_type VARCHAR(20) DEFAULT 'Regular' CHECK (membership_type IN('Regular', 'VIP', 'Gold'))
+);
+
+INSERT INTO customrrs (name, membership_type) VALUES
+('Tanaka', 'VIP'),
+('Suzuki', 'Regular'),
+('Yamada', 'Gold'),
+('Sato', 'Regular'),
+('Mia','VIP')
+;
+CREATE TABLE customer_orders (
+    id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL REFERENCES customrrs(id) ON DELETE CASCADE,
+    amount INT NOT NULL CHECK (amount >0),
+    order_date DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+ INSERT INTO customer_orders(customer_id, amount, order_date) VALUES
+ (1,15000,'2026-10-01'),
+ (1,20000,'2026-10-05'),
+ (2,5000,'2026-10-02'),
+ (2,3000,'2026-10-10'),
+ (5,400,'2026-10-09')
+ ;
+
+INSERT INTO customer_orders(customer_id, amount, order_date) VALUES
+(99,20000,'2026-10-7');
+
+SELECT customrrs.name, customrrs.membership_type, COALESCE(SUM(customer_orders.amount),0) as total_amount
+FROM customrrs
+LEFT JOIN customer_orders ON  customrrs.id = customer_orders.customer_id
+GROUP BY customrrs.id;
