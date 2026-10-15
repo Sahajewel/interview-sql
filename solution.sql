@@ -634,3 +634,53 @@ SELECT customrrs.name, customrrs.membership_type, COALESCE(SUM(customer_orders.a
 FROM customrrs
 LEFT JOIN customer_orders ON  customrrs.id = customer_orders.customer_id
 GROUP BY customrrs.id;
+
+SELECT customer_id,SUM(amount) AS total_amount,
+CASE
+ WHEN SUM(amount) >= 30000 THEN 'High Spender'
+ WHEN SUM(amount) >= 10000 THEN 'Medium Spender'
+ ELSE 'Low Spender'
+ END AS status
+ FROM customer_orders
+ GROUP BY customer_id
+ HAVING SUM(amount)>10000
+  ;
+
+  CREATE TABLE books(
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT null,
+    price INT NOT NULL CHECK (price >=0)
+  );
+
+INSERT INTO books(title, category, price) VALUES
+('Database systems', 'IT', 3500),
+('Javascript Guide', 'IT', 2800),
+('Japanese Grammar', 'Languages', 1800),
+('World History', 'History', 2200),
+('Quantum Physics', 'Science', 4000)
+;
+  CREATE TABLE book_loans (
+    id SERIAL PRIMARY KEY,
+    book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+    borrow_name VARCHAR(50) NOT NULL,
+    borrow_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    returns_status VARCHAR(50) DEFAULT 'Borrowed' CHECK (returns_status IN('Borrowed', 'Returened'))
+  );
+
+INSERT INTO book_loans (book_id, borrow_name,borrow_date,returns_status) VALUES
+(1,'Saha', '2026-10-01','Returened'),
+(1,'Suzuki', '2026-10-05','Borrowed'),
+(2,'Yamada', '2026-10-10','Borrowed'),
+(3,'Sato', '2026-10-12','Returened');
+
+SELECT books.id,books.title, books.category, COUNT(
+    CASE 
+    WHEN book_loans.returns_status = 'Returened'
+    THEN book_loans.id
+    END
+) AS borrow_count
+FROM books
+LEFT JOIN book_loans ON books.id = book_loans.book_id
+GROUP BY books.id,books.title,books.category;
+
